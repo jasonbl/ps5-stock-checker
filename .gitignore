@@ -2,3 +2,4 @@
 .idea
 chromedriver
 deployment-package.zip
+__pycache__
