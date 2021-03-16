@@ -1,0 +1,14 @@
+certifi==2020.12.5
+chardet==4.0.0
+EasyProcess==0.3
+idna==2.10
+ps5-stock-checker @ file:///Users/Jason1/BitBucket/ps5-stock-checker
+PyJWT==1.7.1
+python-dotenv==0.15.0
+pytz==2021.1
+random-user-agent==1.0.1
+requests==2.25.1
+selenium==3.141.0
+six==1.15.0
+twilio==6.53.0
+urllib3==1.26.3
