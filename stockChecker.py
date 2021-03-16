@@ -46,6 +46,17 @@ def check_amazon(driver: WebDriver, wait: WebDriverWait):
     except NoSuchElementException:
         print("Unavailable")
 
+def check_gamestop(driver: WebDriver, wait: WebDriverWait):
+    print("Checking GameStop...")
+    driver.get(PlaystationSeller.GAME_STOP.url)
+
+    add_to_cart_button = wait.until(lambda d: d.find_elements_by_class_name("add-to-cart"))[0]
+    if add_to_cart_button.text.lower() == "add to cart":
+        sendText(PlaystationSeller.GAME_STOP)
+    else:
+        print("Unavailable")
+
+
 def sendText(source: PlaystationSeller):
     print("PS5 in stock at " + source.seller_name + ". Sending text...")
     sendInStockText(source.seller_name, source.url)
@@ -55,6 +66,7 @@ def check_stock(event, context):
     with build_web_driver() as driver:
         wait = WebDriverWait(driver, timeout=3)
         check_amazon(driver, wait)
+        check_gamestop(driver, wait)
 
 if __name__ == "__main__":
     check_stock(None, None)
