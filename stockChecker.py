@@ -86,7 +86,7 @@ def sendText(source: PlaystationSeller):
 def check_stock(event, context):
     seller = event["seller"]
     with build_web_driver() as driver:
-        wait = WebDriverWait(driver, timeout=3)
+        wait = WebDriverWait(driver, timeout=5)
         if seller == "AMAZON":
             check_amazon(driver, wait)
         elif seller == "GAME_STOP":
