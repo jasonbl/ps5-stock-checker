@@ -35,10 +35,11 @@ def build_web_driver():
         options=options,
     )
 
-def check_amazon(driver: WebDriver, wait: WebDriverWait):
+def check_amazon(driver: WebDriver):
     print("Checking Amazon...")
     driver.get(PlaystationSeller.AMAZON.url)
 
+    wait = WebDriverWait(driver, timeout=3)
     wait.until(lambda d: d.find_elements_by_id("outOfStock") or d.find_elements_by_id("add-to-cart-button"))
     try:
         driver.find_element_by_id("add-to-cart-button")
@@ -46,30 +47,33 @@ def check_amazon(driver: WebDriver, wait: WebDriverWait):
     except NoSuchElementException:
         print("Unavailable")
 
-def check_game_stop(driver: WebDriver, wait: WebDriverWait):
+def check_game_stop(driver: WebDriver):
     print("Checking GameStop...")
     driver.get(PlaystationSeller.GAME_STOP.url)
 
+    wait = WebDriverWait(driver, timeout=3)
     add_to_cart_button = wait.until(lambda d: d.find_elements_by_class_name("add-to-cart"))[0]
     if add_to_cart_button.text.lower() == "add to cart":
         sendText(PlaystationSeller.GAME_STOP)
     else:
         print("Unavailable")
 
-def check_best_buy(driver: WebDriver, wait: WebDriverWait):
+def check_best_buy(driver: WebDriver):
     print("Checking Best Buy...")
     driver.get(PlaystationSeller.BEST_BUY.url)
 
+    wait = WebDriverWait(driver, timeout=5)
     add_to_cart_button = wait.until(lambda d: d.find_elements_by_class_name("add-to-cart-button"))[0]
     if add_to_cart_button.text.lower() == "add to cart":
         sendText(PlaystationSeller.BEST_BUY)
     else:
         print("Unavailable")
 
-def check_target(driver: WebDriver, wait: WebDriverWait):
+def check_target(driver: WebDriver):
     print("Checking Target...")
     driver.get(PlaystationSeller.TARGET.url)
 
+    wait = WebDriverWait(driver, timeout=3)
     wait.until(lambda d: d.find_elements_by_css_selector("div[data-test=soldOutBlock]")
                          or d.find_elements_by_css_selector("button[data-test=shipItButton]"))
     try:
@@ -86,15 +90,14 @@ def sendText(source: PlaystationSeller):
 def check_stock(event, context):
     seller = event["seller"]
     with build_web_driver() as driver:
-        wait = WebDriverWait(driver, timeout=5)
         if seller == "AMAZON":
-            check_amazon(driver, wait)
+            check_amazon(driver)
         elif seller == "GAME_STOP":
-            check_game_stop(driver, wait)
+            check_game_stop(driver)
         elif seller == "BEST_BUY":
-            check_best_buy(driver, wait)
+            check_best_buy(driver)
         elif seller == "TARGET":
-            check_target(driver, wait)
+            check_target(driver)
         else:
             raise ValueError("Invalid seller: " + seller)
 
