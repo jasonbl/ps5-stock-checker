@@ -13,7 +13,7 @@ from PlaystationSeller import PlaystationSeller
 from textSender import sendInStockText
 
 software_names = [SoftwareName.CHROME.value]
-operating_systems = [OperatingSystem.WINDOWS.value, OperatingSystem.LINUX.value]
+operating_systems = [OperatingSystem.WINDOWS.value, OperatingSystem.LINUX.value, OperatingSystem.MAC_OS_X.value]
 user_agent_rotator = UserAgent(software_names=software_names, operating_systems=operating_systems, limit=100)
 
 def build_web_driver():
@@ -46,7 +46,7 @@ def check_amazon(driver: WebDriver, wait: WebDriverWait):
     except NoSuchElementException:
         print("Unavailable")
 
-def check_gamestop(driver: WebDriver, wait: WebDriverWait):
+def check_game_stop(driver: WebDriver, wait: WebDriverWait):
     print("Checking GameStop...")
     driver.get(PlaystationSeller.GAME_STOP.url)
 
@@ -56,6 +56,27 @@ def check_gamestop(driver: WebDriver, wait: WebDriverWait):
     else:
         print("Unavailable")
 
+def check_best_buy(driver: WebDriver, wait: WebDriverWait):
+    print("Checking Best Buy...")
+    driver.get(PlaystationSeller.BEST_BUY.url)
+
+    add_to_cart_button = wait.until(lambda d: d.find_elements_by_class_name("add-to-cart-button"))[0]
+    if add_to_cart_button.text.lower() == "add to cart":
+        sendText(PlaystationSeller.BEST_BUY)
+    else:
+        print("Unavailable")
+
+def check_target(driver: WebDriver, wait: WebDriverWait):
+    print("Checking Target...")
+    driver.get(PlaystationSeller.TARGET.url)
+
+    wait.until(lambda d: d.find_elements_by_css_selector("div[data-test=soldOutBlock]")
+                         or d.find_elements_by_css_selector("button[data-test=shipItButton]"))
+    try:
+        driver.find_element_by_css_selector("button[data-test=shipItButton]")
+        sendText(PlaystationSeller.TARGET)
+    except NoSuchElementException:
+        print("Unavailable")
 
 def sendText(source: PlaystationSeller):
     print("PS5 in stock at " + source.seller_name + ". Sending text...")
@@ -63,10 +84,22 @@ def sendText(source: PlaystationSeller):
     print("Text successfully sent")
 
 def check_stock(event, context):
+    seller = event["seller"]
     with build_web_driver() as driver:
         wait = WebDriverWait(driver, timeout=3)
-        check_amazon(driver, wait)
-        check_gamestop(driver, wait)
+        if seller == "AMAZON":
+            check_amazon(driver, wait)
+        elif seller == "GAME_STOP":
+            check_game_stop(driver, wait)
+        elif seller == "BEST_BUY":
+            check_best_buy(driver, wait)
+        elif seller == "TARGET":
+            check_target(driver, wait)
+        else:
+            raise ValueError("Invalid seller: " + seller)
 
 if __name__ == "__main__":
-    check_stock(None, None)
+    event = {
+        "seller": "BEST_BUY"
+    }
+    check_stock(event, None)
