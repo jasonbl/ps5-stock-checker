@@ -4,7 +4,7 @@ from dotenv import load_dotenv
 from random_user_agent.params import SoftwareName, OperatingSystem
 from random_user_agent.user_agent import UserAgent
 from selenium import webdriver
-from selenium.common.exceptions import NoSuchElementException
+from selenium.common.exceptions import NoSuchElementException, TimeoutException
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.remote.webdriver import WebDriver
 from selenium.webdriver.support.wait import WebDriverWait
@@ -74,13 +74,18 @@ def check_target(driver: WebDriver):
     driver.get(PlaystationSeller.TARGET.url)
 
     wait = WebDriverWait(driver, timeout=3)
-    wait.until(lambda d: d.find_elements_by_css_selector("div[data-test=soldOutBlock]")
-                         or d.find_elements_by_css_selector("button[data-test=shipItButton]"))
+
+    # Purposely looking for the sold out block first because Target sometimes loads the purchase button
+    # before it realizes stock isn't available
     try:
-        driver.find_element_by_css_selector("button[data-test=shipItButton]")
-        sendText(PlaystationSeller.TARGET)
-    except NoSuchElementException:
+        wait.until(lambda d: d.find_elements_by_css_selector("div[data-test=soldOutBlock]"))
         print("Unavailable")
+        return
+    except TimeoutException:
+        pass
+
+    wait.until(lambda d: d.find_elements_by_css_selector("button[data-test=shipItButton]"))
+    sendText(PlaystationSeller.TARGET)
 
 def sendText(source: PlaystationSeller):
     print("PS5 in stock at " + source.seller_name + ". Sending text...")
@@ -103,6 +108,6 @@ def check_stock(event, context):
 
 if __name__ == "__main__":
     event = {
-        "seller": "BEST_BUY"
+        "seller": "TARGET"
     }
     check_stock(event, None)
