@@ -100,9 +100,11 @@ def check_stock(event, context):
         elif seller == "GAME_STOP":
             check_game_stop(driver)
         elif seller == "BEST_BUY":
+            # Best Buy appears to block web traffic coming from AWS, so this won't work remotely
             check_best_buy(driver)
         elif seller == "TARGET":
             check_target(driver)
+        # Walmart not included because it blocks all headless browser requests
         else:
             raise ValueError("Invalid seller: " + seller)
 
